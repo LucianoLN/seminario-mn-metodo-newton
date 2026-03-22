@@ -1,49 +1,68 @@
-import math
+import math  # Importa a biblioteca math para usar o valor de pi
 
-def f(h):
-    # Função baseada no volume da calota esférica: (pi * h^2 / 3) * (3R - h) - V
-    return (math.pi * h**2 / 3) * (9 - h) - 30
+def volume_esfera(R):
+    return (4 * math.pi * (R ** 3)) / 3
 
-def df(h):
-    # Derivada da função em relação a h: pi * h * (2R - h)
-    return math.pi * h * (6 - h)
+# Função f(h): representa a equação do volume da calota esférica menos o volume desejado
+def f(h, R, V):
+    return (math.pi * h**2 / 3) * (3*R - h) - V
 
-def metodo_newton(h0, tolerancia, max_iter):
-    h = h0
+# Função derivada f'(h): derivada da função f(h) em relação a h
+def df(h, R):
+    return math.pi * h * (2*R - h)
+
+# Função que aplica o método de Newton-Raphson
+def metodo_newton(h0, R, V, tolerancia, max_iter):
+    h = h0  # Define h com o valor do chute inicial
+
+    # Mostra o cabeçalho da tabela de iterações
     print(f"{'Iteração':<10} | {'Altura (h)':<15} | {'Erro (f(h))':<15}")
     print("-" * 45)
-    
+
+    # Laço que repete o processo até o número máximo de iterações
     for i in range(max_iter):
-        f_h = f(h)
-        df_h = df(h)
-        
-        # Evita divisão por zero
+        f_h = f(h, R, V)   # Calcula o valor da função no ponto atual
+        df_h = df(h, R)    # Calcula o valor da derivada no ponto atual
+
+        # Verifica se a derivada é zero para evitar divisão por zero
         if df_h == 0:
             print("Derivada nula. O método falhou.")
-            return None
-            
-        # Fórmula de Newton-Raphson: h_novo = h - f(h)/f'(h)
+            return None  # Encerra a função se não puder continuar
+
+        # Fórmula do método de Newton-Raphson
         h_novo = h - f_h / df_h
-        
+
+        # Exibe os dados da iteração atual
         print(f"{i+1:<10} | {h:<15.6f} | {f_h:<15.6e}")
-        
-        # Critério de parada
+
+        # Verifica se a diferença entre o valor novo e o antigo é menor que a tolerância
         if abs(h_novo - h) < tolerancia:
-            return h_novo
-        
-        h = h_novo
-        
+            return h_novo  # Retorna o valor encontrado se o erro for pequeno
+
+        h = h_novo  # Atualiza h para a próxima iteração
+
+    # Se atingir o número máximo de iterações, retorna o último valor calculado
     return h
 
-# Parâmetros Iniciais
-raio = 3
-volume_alvo = 30
-chute_inicial = 3.0  # Começamos no meio do tanque (h = R)
-erro_admitido = 0.0001
+# =========================
+# Programa principal
+# =========================
 
+R = 3              # Raio da esfera
+V = 30           # Volume desejado
+h0 = 3.0           # Chute inicial para a altura
+tolerancia = 0.0001  # Erro máximo permitido
+max_iter = 20      # Número máximo de iterações
 
-resultado = metodo_newton(chute_inicial, erro_admitido, 20)
-
-if resultado:
-    print("-" * 45)
-    print(f"A altura necessária é: {resultado:.4f} metros")
+# Verificação dos valores da esfera
+if (V > volume_esfera(R)): 
+    print("VOLUME INVÁLIDO")
+    print(f"Volume máximo da esfera é de {volume_esfera(R):.2f}")
+else:
+    # Chama a função do método de Newton
+    resultado = metodo_newton(h0, R, V, tolerancia, max_iter)
+    
+    # Verifica se encontrou um resultado válido
+    if resultado:
+        print("-" * 45)
+        print(f"A altura necessária é: {resultado:.4f} metros")
